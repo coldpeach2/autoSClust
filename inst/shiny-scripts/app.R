@@ -140,24 +140,25 @@ server <- function(input, output) {
     req(input$qcMetric)
     plot_list <- runPreProcess(counts_matrix_path=Read10X(data.dir = input$dir$datapath), filterMetrics=input$qcMetric)
     plot_list
+    print(plot_list)
   })
 
   # render UI
   output$plots <- renderUI({
     req(input$dir)
     req(input$qcMetric)
-    lapply(1:length(runPreOut()[-1]), function(i) {
+    #print(length(runPreOut()))
+    lapply(1:2, function(i) {
       # creates a unique ID for each plotOutput
       id <- paste0("plot_", i)
       plotOutput(outputId = id)
       # render each plot
-      output[[id]] <- renderPlot({
-        x <- runPreOut()[[i]][-1]
+      output$id <- renderPlot({
+        x <- runPreOut()[i]
         patchwork(x + NoLegend() +
                     plot_annotation(theme=theme(plot.title = element_text(hjust = 0.5, face="bold"))))
         })
     })
     })
-
 }
 shinyApp(ui, server)

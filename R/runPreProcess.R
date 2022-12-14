@@ -20,9 +20,9 @@
 #'
 #' @import Seurat Matrix ggplot2 patchwork
 
-counts_matrix_path <- file.path("~/autoSClust/sample/srt.data/hg19/")
+#counts_matrix_path <- file.path("~/autoSClust/sample/srt.data/hg19/")
 # Create a Seurat object from the raw data and visualize QC metrics
-runPreProcess(counts_matrix_path, "all")
+
 runPreProcess <- function(counts_matrix_path, filterMetrics) {
   data_matrix <- Read10X(data.dir = counts_matrix_path)# use seurat function to read 10X count data
   srt.data <- CreateSeuratObject(data_matrix)
@@ -60,7 +60,7 @@ runPreProcess <- function(counts_matrix_path, filterMetrics) {
                        nFeature_RNA > min_nFeature &
                        nFeature_RNA < max_nFeature &
                        nCount_RNA   > min_nCount &
-                       nCount_RNA   < max_nCount &
+                       nCount_RNA   < max_nCount )
 
   if ((filterMetrics == "percent_mitochondrial") || (filterMetrics == "all" )){
     srt.data[["percent_mt"]] <- PercentageFeatureSet(srt.data, pattern = "^MT-")
@@ -118,7 +118,6 @@ runPreProcess <- function(counts_matrix_path, filterMetrics) {
     }
 
     plots <- list[v1, f1, v2, f2]
-    #metadata
     if (exists("v3") && exists("v4") && exists("v5")) {
       print(patchwork::wrap_plots(v1 + f1 | v2 + f2 | v3 + f3 | v4 + f4 | v5 + f5 + plot_layout(guides = 'collect') + NoLegend()) +
               plot_annotation(theme=theme(plot.title = element_text(hjust = 0.5, face="bold"))))
@@ -155,5 +154,5 @@ runPreProcess <- function(counts_matrix_path, filterMetrics) {
   }
 
 }
-}
+
 
