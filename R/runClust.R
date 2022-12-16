@@ -20,7 +20,7 @@
 #' }
 #'
 #' @import cluster SingleCellExperiment Seurat clValid scuttle utils
-runClust <- function(srt.data, features, dims, res) {
+runClust <- function(srt.data, features, res) {
 
   # Find variable features, identification of highly variable features
   srt.data <- FindVariableFeatures(srt.data, selection.method = "vst", nfeatures = 2000)
@@ -37,5 +37,7 @@ runClust <- function(srt.data, features, dims, res) {
 
   # non linear dimensionality reduction
   srt.data <- RunUMAP(srt.data, dims = 1:30, verbose = FALSE)
+
+  return(srt.data)
 
 }

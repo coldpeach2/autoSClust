@@ -20,17 +20,23 @@
 #'
 #' @import Seurat Matrix ggplot2 patchwork
 
-#counts_matrix_path <- file.path("~/autoSClust/sample/srt.data/hg19/")
+#counts_matrix_path <- file.path("~/pbmc/hg19")
+#runPreProcess(counts_matrix_path = counts_matrix_path,filterMetrics="all")
 # Create a Seurat object from the raw data and visualize QC metrics
 
+library(Seurat)
+library(SeuratObject)
+library(SeuratWrappers)
+library(Matrix)
+library(ggplot2)
+library(tidyverse)
 runPreProcess <- function(counts_matrix_path, filterMetrics) {
-  data_matrix <- Read10X(data.dir = counts_matrix_path)# use seurat function to read 10X count data
+  data_matrix <- Read10X(counts_matrix_path)# use seurat function to read 10X count data
   srt.data <- CreateSeuratObject(data_matrix)
 
-
   #Violin Plots
-  v1 <- VlnPlot(srt.data, features="nFeature_RNA", cols="pink", pt.size=0.02) + NoLegend() + theme(axis.text.x=element_text(angle=0, hjust=0.5)) + ggplot2::geom_boxplot(width=0.1, outlier.shape=NA)
-  v2 <- VlnPlot(srt.data, features="nCount_RNA", cols="blue", pt.size=0.02) + NoLegend() + theme(axis.text.x=element_text(angle=0, hjust=0.5)) + ggplot2::geom_boxplot(width=0.1, outlier.shape=NA)
+  v1 <- VlnPlot(srt.data, features="nFeature_RNA", cols="pink", pt.size=0.02) + NoLegend() + theme(axis.text.x=element_text(angle=0, hjust=0.5))
+  v2 <- VlnPlot(srt.data, features="nCount_RNA", cols="blue", pt.size=0.02) + NoLegend() + theme(axis.text.x=element_text(angle=0, hjust=0.5))
 
 
   # min and max genes detected in each cell
@@ -51,10 +57,7 @@ runPreProcess <- function(counts_matrix_path, filterMetrics) {
   #umi lines on y axis
   nCount.x.max <- ggplot2::geom_vline(xintercept=max_nCount, linetype="dashed", color="darkgrey")
   nCount.y.min <- ggplot2::geom_hline(yintercept=min_nCount, linetype="dashed", color="darkgrey")
-
-  f1 <- FeatureScatter(srt.data, feature1="nFeature_RNA", feature2="nCount_RNA", pt.size = 0.3, group.by = "filtered")
-                      + scale_color_manual(values = c("pink", "#666666")) +  theme(plot.title=element_blank())
-                      + nFeature.min + nFeature.max + nCount.y.min + nCount.y.max + NoLegend()
+  f1 <- FeatureScatter(srt.data, feature1="nFeature_RNA", feature2="nCount_RNA", pt.size = 0.3) + scale_color_manual(values = c("#03fc4e", "#666666")) + ggtitle("Genes per Cell vs Count reads per Cell") + nFeature.min + nFeature.max + nCount.y.min + nCount.y.max + NoLegend()
 
   srt.data <- subset(srt.data, subset =
                        nFeature_RNA > min_nFeature &
@@ -64,7 +67,7 @@ runPreProcess <- function(counts_matrix_path, filterMetrics) {
 
   if ((filterMetrics == "percent_mitochondrial") || (filterMetrics == "all" )){
     srt.data[["percent_mt"]] <- PercentageFeatureSet(srt.data, pattern = "^MT-")
-    v3 <- VlnPlot(srt.data, features="percent_mt", cols="green", pt.size=0.02) + NoLegend() + theme(axis.text.x=element_text(angle=0, hjust=0.5)) + ggplot2::geom_boxplot(width=0.1, outlier.shape=NA)
+    v3 <- VlnPlot(srt.data, features="percent_mt", cols="green", pt.size=0.02) + NoLegend() + theme(axis.text.x=element_text(angle=0, hjust=0.5))
 
     max_mito <- max(as.numeric(unlist(srt.data[["percent_mt"]])))
     min_mito <- min(as.numeric(unlist(srt.data[["percent_mt"]])))
@@ -72,19 +75,19 @@ runPreProcess <- function(counts_matrix_path, filterMetrics) {
     #Mt
     mito.x <- ggplot2::geom_vline(xintercept=max_mito, linetype="dashed", color="darkgrey")
     mito.y <- ggplot2::geom_hline(yintercept=max_mito, linetype="dashed", color="darkgrey")
-    f2 <- FeatureScatter(srt.data, feature1="nFeature_RNA", feature2="percent_mt", pt.size = 0.3, group.by = "filtered")+ scale_color_manual(values = c("purple", "#666666")) + theme(plot.title=element_blank()) +
+    f2 <- FeatureScatter(srt.data, feature1="nFeature_RNA", feature2="percent_mt", pt.size = 0.3)+ scale_color_manual(values = c("purple", "#666666")) + ggtitle("Percentage of Mitochondrial Genes") +
       nFeature.min + nFeature.max + mito.y + NoLegend()
   }
   if ((filterMetrics == "percent_ribosomal") || (filterMetrics == "all" )) {
     srt.data[["percent_ribo"]] <- PercentageFeatureSet(srt.data, pattern = '^RPL|^RPS|^MRPL|^MRPS')
-    v4 <- VlnPlot(srt.data, features="percent_ribo", cols="orange", pt.size=0.02) + NoLegend() + theme(axis.text.x=element_text(angle=0, hjust=0.5)) + ggplot2::geom_boxplot(width=0.1, outlier.shape=NA)
+    v4 <- VlnPlot(srt.data, features="percent_ribo", cols="orange", pt.size=0.02) + NoLegend() + theme(axis.text.x=element_text(angle=0, hjust=0.5))
     # min and max percentage of ribosomal genes
     max_ribo <- max(as.numeric(unlist(srt.data[["percent_ribo"]])))
     min_ribo <- min(as.numeric(unlist(srt.data[["percent_ribo"]])))
     #Ribo
     ribo.x <- ggplot2::geom_vline(xintercept=max_ribo, linetype="dashed", color="darkgrey")
     ribo.y <- ggplot2::geom_hline(yintercept=max_ribo, linetype="dashed", color="darkgrey")
-    f4 <- FeatureScatter(srt.data, feature1="nFeature_RNA", feature2="percent_ribo", pt.size = 0.3, group.by = "filtered")+ scale_color_manual(values = c("green", "#666666")) + theme(plot.title=element_blank()) +
+    f4 <- FeatureScatter(srt.data, feature1="nFeature_RNA", feature2="percent_ribo", pt.size = 0.3)+ scale_color_manual(values = c("green", "#666666")) + ggtitle("Percentage of Ribosomal Genes") +
       nFeature.min + nFeature.max + ribo.y  + NoLegend()
   }
 
@@ -104,7 +107,7 @@ runPreProcess <- function(counts_matrix_path, filterMetrics) {
                         "STAT3","TAGLN2","TIPARP","TNFAIP3","TNFAIP6","TPM3","TPPP3","TRA2A","TRA2B","TRIB1",
                         "TUBB4B","TUBB6","UBC","USP2","WAC","ZC3H12A","ZFAND5","ZFP36","ZFP36L1","ZFP36L2","ZYX")
       srt.data[["percent_disso"]] <- PercentageFeatureSet(srt.data, pattern = dissociation)
-      v5 <- VlnPlot(srt.data, features="percent_disso", cols="purple", pt.size=0.02) + NoLegend() + theme(axis.text.x=element_text(angle=0, hjust=0.5)) + ggplot2::geom_boxplot(width=0.1, outlier.shape=NA)
+      v5 <- VlnPlot(srt.data, features="percent_disso", cols="purple", pt.size=0.02) + NoLegend() + theme(axis.text.x=element_text(angle=0, hjust=0.5))
       # min and max percentage of dissociation genes
       max_dis <- max(as.numeric(unlist(srt.data[["percent_disso"]])))
       min_dis <- min(as.numeric(unlist(srt.data[["percent_disso"]])))
@@ -112,44 +115,45 @@ runPreProcess <- function(counts_matrix_path, filterMetrics) {
       #Disso
       disso.x <- ggplot2::geom_vline(xintercept=max_dis, linetype="dashed", color="darkgrey")
       disso.y <- ggplot2::geom_hline(yintercept=max_dis, linetype="dashed", color="darkgrey")
-
-      f5 <- FeatureScatter(srt.data, feature1="nFeature_RNA", feature2="percent_disso", pt.size = 0.3, group.by = "filtered")+ scale_color_manual(values = c("#590849", "#666666")) + theme(plot.title=element_blank()) +
+      f5 <- FeatureScatter(srt.data, feature1="nFeature_RNA", feature2="percent_disso", pt.size = 0.3)+ scale_color_manual(values = c("#590849", "#666666")) + ggtitle("Percentage of Dissociation Genes") +
         nFeature.min + nFeature.max + disso.y  + NoLegend()
     }
 
-    plots <- list[v1, f1, v2, f2]
+    #plots <- list(v1, f1, v2)
+
+    #return(plots)
     if (exists("v3") && exists("v4") && exists("v5")) {
-      print(patchwork::wrap_plots(v1 + f1 | v2 + f2 | v3 + f3 | v4 + f4 | v5 + f5 + plot_layout(guides = 'collect') + NoLegend()) +
-              plot_annotation(theme=theme(plot.title = element_text(hjust = 0.5, face="bold"))))
+      #print(patchwork::wrap_plots(v1 + f1 | v2 | v3 + f2 | v4 + f4 | v5 + f5 + plot_layout(guides = 'collect') + NoLegend()) +
+             # plot_annotation(theme=theme(plot.title = element_text(hjust = 0.5, face="bold"))))
 
       srt.data <- subset(srt.data, subset =
                            percent_mt   < max_mito &
                            percent_ribo < max_ribo &
                            percent_disso < max_dis)
-      final_plot <- append(plots, c(v3, f3, v4, f4, v5, f5))
+      final_plot <- list(v1, f1, v2, v3, f2, v4, f4, v5, f5, srt.data)
       return(final_plot)
     }
     if (exists("v3")) {
-      print(patchwork::wrap_plots(v1 + f1 | v2 + f2  | v3 + f3 + plot_layout(guides = 'collect') + NoLegend()) +
-              plot_annotation(theme=theme(plot.title = element_text(hjust = 0.5, face="bold"))))
+      #print(patchwork::wrap_plots(v1 + f1 | v2 | v3 + f3 + plot_layout(guides = 'collect') + NoLegend()) +
+             # plot_annotation(theme=theme(plot.title = element_text(hjust = 0.5, face="bold"))))
       srt.data <- subset(srt.data, subset = percent_mt   < max_mito)
-      final_plot <- append(plots, c(v3, f3))
+      final_plot <- list(v1, f1, v2, v3, f2, srt.data)
       return(final_plot)
 
     }
   if (exists("v4")) {
-    print(patchwork::wrap_plots(v1 + f1 | v2 + f2 | v4 + f4 + plot_layout(guides = 'collect') + NoLegend()) +
-            plot_annotation(theme=theme(plot.title = element_text(hjust = 0.5, face="bold"))))
+    #print(patchwork::wrap_plots(v1 + f1 | v2 | v4 + f4 + plot_layout(guides = 'collect') + NoLegend()) +
+            #plot_annotation(theme=theme(plot.title = element_text(hjust = 0.5, face="bold"))))
     srt.data <- subset(srt.data, subset = percent_ribo < max_ribo )
-    final_plot <- append(plots, c(v4, f4))
+    final_plot <- list(v1, f1, v2, v4, f4, srt.data)
     return(final_plot)
 
   }
   if (exists("v5")) {
-    print(patchwork::wrap_plots(v1 + f1 | v2 + f2  | v5 + f5 + plot_layout(guides = 'collect') + NoLegend()) +
-            plot_annotation(theme=theme(plot.title = element_text(hjust = 0.5, face="bold"))))
+    #print(patchwork::wrap_plots(v1 + f1 | v2 | v5 + f5 + plot_layout(guides = 'collect') + NoLegend()) +
+            #plot_annotation(theme=theme(plot.title = element_text(hjust = 0.5, face="bold"))))
     srt.data <- subset(srt.data, subset = percent_disso < max_dis )
-    final_plot <- append(plots, c(v5, f5))
+    final_plot <- list(v1, f1, v2, v5, f5, srt.data)
     return(final_plot)
   }
 
