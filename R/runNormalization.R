@@ -4,22 +4,14 @@
 #' A function that takes in user defined normalization methods and outputs a density plot
 #'
 #' @param srt.data A Seurat object
-#' @param norm Character vector of normalization methods.Choices are "Log", "SCT" or "CPM". Default is "Log"
+#' @param norm String of selected normalization methods. Choices are "Log", "SCT" or "CPM". Default is "Log"
 #'
 #' @return seurat object of normalized gene counts
 #'
 #' @export
 #'
-#' @examples
-#' # Example:
-#' \dontrun{
-#' data(embryo)
-#' data(embryoClusts)
-#' # Compute metrics for the first clustering output on the embryo dataset
-#' metrics <- computeUnsupervisedMetrics(embryo, embryoClusts[[1]])
-#' }
 #'
-#' @import cluster SingleCellExperiment Seurat clValid scuttle utils
+#' @import  Seurat ggplot2 Matrix
 
 
 

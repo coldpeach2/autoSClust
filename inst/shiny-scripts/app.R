@@ -16,7 +16,9 @@ ui <- fluidPage(
       tags$p("Welcome to Shiny App of autSClust R package."),
       # br() element to introduce extra vertical spacing ----
       br(),
-      tags$b("Description: "),
+      tags$b("Description: Deploy the scRNA sequencing data analysis pipeline for downstream cell level and gene level
+             expression analysis. This package is meant to accommodate a broad range of scRNA-seq data types and output
+             visual aides so users can quickly determine the best method according to the nature of the dataset."),
 
       # br() element to introduce extra vertical spacing ----
       br(),
@@ -62,11 +64,6 @@ ui <- fluidPage(
                 choices = c("all",
                             "dunn",
                             "rand")),
-
-      # actionButton
-      actionButton(inputId = "button2",
-                   label = "Run"),
-
       # br() element to introduce extra vertical spacing -
       br(),
 
@@ -124,10 +121,9 @@ server <- function(input, output) {
                    file.path(home, paste(unlist(dir()$path[-1]), collapse = .Platform$file.sep))
                })
 
-  output$seuratSummary <- renderTable({
-    req(input$dir)
-    data_matrix <- Read10X(data.dir = input$dir)
-  },)
+  url <- a("Sample data. Navigate to subdirectory /hg19)", href="https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz")
+  output$tab <- renderUI({
+    tagList("Download:", url)})
 
   # reactive expression to process data
   runPreOut <- reactive({

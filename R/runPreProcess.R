@@ -1,8 +1,4 @@
 #' runPreProcess
-#'
-#' A function that runs user-defined pre processing steps of computing new quality control metrics in the dataset and filtering out uninformative genes
-#'
-#'
 #' @param counts_matrix_path Path that points to the location of raw data folder containing a barcodes.tsv, genes.tsv and matrix.mtx
 #' @param filterMetrics String indicating which filtration method to apply to dataset according to quality control metrics.
 #' Choices are "percent_mt", "percent_ribo", "percent_disso" or "all. Default is "all"
@@ -11,18 +7,11 @@
 #'
 #' @export
 #'
-#' @details
-
-#'
-#' @examples
-
+#' @details A function that runs user-defined pre processing steps of computing new quality control metrics in the dataset and filtering out uninformative genes
 #'
 #'
 #' @import Seurat Matrix ggplot2 patchwork
 
-#counts_matrix_path <- file.path("~/pbmc/hg19")
-#runPreProcess(counts_matrix_path = counts_matrix_path,filterMetrics="all")
-# Create a Seurat object from the raw data and visualize QC metrics
 
 library(Seurat)
 library(SeuratObject)
